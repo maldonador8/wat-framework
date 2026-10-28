@@ -1,69 +1,66 @@
 # WAT Framework
 
-**Workflows · Agents · Tools** — separation-of-concerns automation stack.
+**Workflows · Agents · Tools**: a small automation stack that keeps AI reasoning and code execution in separate layers.
 
-Probabilistic AI handles reasoning. Deterministic code handles execution. That split is what makes the system reliable.
+I built and run this at Laiyer8 LLC to operate a production SaaS product (subscription billing, content, social distribution, outreach) with minimal manual work.
 
-## Layers
+## Why this design
 
-- **Workflows** (`workflows/`) — Markdown SOPs. Objective, inputs, tool sequence, expected outputs, edge cases.
-- **Agents** — The decision-maker (you + Claude). Reads the workflow, calls tools in order, recovers from failures.
-- **Tools** (`tools/`) — Python scripts that do the actual work. API calls, data transforms, file ops.
+An AI agent that does every step itself compounds its error rate: five steps at 90% accuracy each succeed only 59% of the time. WAT splits the work:
 
-Why: chaining 5 steps at 90% accuracy each = 59% success. Offloading execution to deterministic scripts keeps the success rate up.
+| Layer | Lives in | Responsibility |
+|---|---|---|
+| **Workflows** | `workflows/*.md` | Plain-language SOPs: objective, inputs, which tools to run in what order, expected outputs, edge cases |
+| **Agent** | Claude Code | Reads the workflow, decides what to run, handles failures, asks a human when a step is external or irreversible |
+| **Tools** | `tools/*.py` | Deterministic Python scripts that do the actual work: API calls, data transforms, file output |
+
+The agent doesn't improvise API calls. It runs a tested script. When a tool fails, the fix goes into the script and the lesson goes into the workflow, so the same failure doesn't happen twice.
+
+### Guardrails
+
+- **Secrets stay in `.env`.** No credentials in code or in git (`.env` is gitignored; see `.env.example`).
+- **Human approval for outward actions.** Anything that sends email, posts publicly, or touches production is drafted or previewed first and needs explicit approval.
+- **Test one, then batch.** Video renders and email campaigns run on a single item before the full batch.
 
 ## Tools
 
-| Script | Purpose |
-|---|---|
-| `ad_copy_generator.py` | Platform-specific ad copy generator (Bible with AI) |
-| `bible_video_batch.py` | Batch-records 50 screen-capture videos answering Bible questions |
-| `bible_video_generator.py` | Single-video generator: AI answer + screen recording |
-| `buffer_post.py` | Auto-post to Buffer → distributes to social platforms |
-| `cold_outreach.py` | Hyper-personalized cold email generator (AIDA + Napoleon Hill close) |
-| `content_pipeline.py` | Content-to-Cash: topic → full content package |
-| `resume_to_docx.py` | Markdown resume → ATS-friendly .docx |
-| `stripe_mrr.py` | Live Stripe MRR/ARR/churn dashboard |
-| `twitter_auth.py` | Twitter/X OAuth 2.0 PKCE one-time setup |
-| `twitter_post.py` | Direct Twitter/X posting via OAuth 1.0a |
+| Script | What it does | Integrations |
+|---|---|---|
+| `stripe_mrr.py` | MRR / ARR / churn report from live subscription data | Stripe API |
+| `content_pipeline.py` | Topic → full content package (posts, email, landing copy) | Anthropic API |
+| `ad_copy_generator.py` | Platform-specific ad copy variants | Anthropic API |
+| `cold_outreach.py` | Personalized outreach email drafts (generates drafts only; nothing is sent) | Anthropic API |
+| `buffer_post.py` | Schedules posts across social platforms | Buffer API |
+| `twitter_auth.py` | One-time OAuth 2.0 PKCE setup | X (Twitter) API |
+| `twitter_post.py` | Direct posting via OAuth 1.0a | X (Twitter) API |
+| `bible_video_generator.py` | AI-generated answer → rendered short-form video | Anthropic API, ffmpeg |
+| `bible_video_batch.py` | Batch wrapper around the video generator | |
+| `resume_to_docx.py` | Markdown → ATS-friendly Word document | python-docx |
 
 ## Workflows
 
-- `buffer_social_posting.md`
-- `cold_outreach.md`
-- `content_to_cash.md`
-- `stripe_mrr_dashboard.md`
+| SOP | Drives |
+|---|---|
+| `stripe_mrr_dashboard.md` | Revenue reporting |
+| `content_to_cash.md` | Content generation → distribution |
+| `buffer_social_posting.md` | Scheduled social posting |
+| `cold_outreach.md` | Outreach drafting and review |
 
 ## Setup
 
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
-pip install anthropic stripe tweepy requests
-cp .env.example .env  # add your keys
+pip install anthropic stripe tweepy requests python-docx
+cp .env.example .env   # then fill in the keys you need
 ```
 
-Required env vars (set in `.env`):
+Each tool only needs the keys for the services it calls. See `.env.example` for the full list.
 
-```
-ANTHROPIC_API_KEY=
-STRIPE_SECRET_KEY=
-TWITTER_API_KEY=
-TWITTER_API_SECRET=
-TWITTER_ACCESS_TOKEN=
-TWITTER_ACCESS_SECRET=
-TWITTER_CLIENT_ID=
-TWITTER_CLIENT_SECRET=
-BUFFER_ACCESS_TOKEN=
-```
+## Tech
 
-## Sync from working copy
+Python 3 · Anthropic Claude API · Stripe API · Buffer API · X API (OAuth 1.0a / 2.0 PKCE) · ffmpeg · Claude Code as the orchestrating agent
 
-The live working copy lives at `~/Library/CloudStorage/OneDrive-Personal/Projects/{tools,workflows}/`. To pull latest changes into this git repo:
+## About
 
-```bash
-cd ~/code/wat-framework
-rsync -av --delete "$HOME/Library/CloudStorage/OneDrive-Personal/Projects/tools/" tools/
-rsync -av --delete "$HOME/Library/CloudStorage/OneDrive-Personal/Projects/workflows/" workflows/
-git add -A && git commit -m "sync: pull latest from working copy" && git push
-```
+Built by **Rafael Maldonado**, Cloud Infrastructure Engineer (AWS · Azure · Terraform) and founder of Laiyer8 LLC.

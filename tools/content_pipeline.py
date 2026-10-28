@@ -17,7 +17,7 @@ All content is saved to .tmp/ and printed to terminal.
 Usage:
     python tools/content_pipeline.py --topic "Bible study app" --product "biblewithai.com"
     python tools/content_pipeline.py --topic "AI for churches" --product "Bible with AI" --audience "pastors"
-    python tools/content_pipeline.py --topic "Claude Code consulting" --product "MITech LLC" --audience "startup founders"
+    python tools/content_pipeline.py --topic "Claude Code consulting" --product "Laiyer8 LLC" --audience "startup founders"
 """
 
 import os

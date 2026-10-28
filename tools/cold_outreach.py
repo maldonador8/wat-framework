@@ -78,8 +78,8 @@ MODEL = 'claude-haiku-4-5-20251001'
 SENDER_INFO = {
     'name': os.environ.get('INVOICE_NAME', 'Rafael Maldonado'),
     'title': os.environ.get('INVOICE_TITLE', 'Founder'),
-    'company': os.environ.get('INVOICE_COMPANY', 'MITech LLC'),
-    'email': os.environ.get('SMTP_EMAIL', 'info@mitechllc.tech'),
+    'company': os.environ.get('INVOICE_COMPANY', 'Laiyer8 LLC'),
+    'email': os.environ.get('SMTP_EMAIL', ''),
 }
 
 def generate_outreach(name, company, role, pain, product, offer, sender=None):
