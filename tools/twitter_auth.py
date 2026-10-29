@@ -67,7 +67,7 @@ class CallbackHandler(http.server.BaseHTTPRequestHandler):
         else:
             self.send_response(400)
             self.end_headers()
-            self.wfile.write(b'<h2>Error — no code received.</h2>')
+            self.wfile.write(b'<h2>Error - no code received.</h2>')
     def log_message(self, *args):
         pass
 

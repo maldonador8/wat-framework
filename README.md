@@ -1,5 +1,7 @@
 # WAT Framework
 
+![CI](https://github.com/maldonador8/wat-framework/actions/workflows/ci.yml/badge.svg)
+
 **Workflows · Agents · Tools**: a small automation stack that keeps AI reasoning and code execution in separate layers.
 
 I built and run this at Laiyer8 LLC to operate a production SaaS product (subscription billing, content, social distribution, outreach) with minimal manual work.
@@ -51,7 +53,7 @@ The agent doesn't improvise API calls. It runs a tested script. When a tool fail
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
-pip install anthropic stripe tweepy requests python-docx
+pip install -r requirements.txt
 cp .env.example .env   # then fill in the keys you need
 ```
 
